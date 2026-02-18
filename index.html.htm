@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigiZag Offer List – Flip Cards</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 32px 16px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #1e2a3b;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            font-size: 1rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .stats {
+            max-width: 1400px;
+            margin: 0 auto 24px;
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            text-align: center;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #6bbf59;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .controls {
+            max-width: 1400px;
+            margin: 0 auto 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .category-filter {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 14px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+
+        .filter-btn:hover {
+            border-color: #6bbf59;
+            color: #6bbf59;
+        }
+
+        .filter-btn.active {
+            background: #6bbf59;
+            border-color: #6bbf59;
+            color: white;
+        }
+
+        .show-all-btn {
+            background: #1e2a3b;
+            color: white;
+            border-color: #1e2a3b;
+        }
+        .show-all-btn:hover {
+            background: #2d3e50;
+            color: white;
+            border-color: #2d3e50;
+        }
+
+        .filter-btn input[type="checkbox"] {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .sort-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .cards-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .offer-card {
+            perspective: 1000px;
+            cursor: pointer;
+            height: 240px;
+        }
+
+        .offer-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .offer-card.flipped .offer-inner {
+            transform: rotateY(180deg);
+        }
+
+        .offer-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backface-visibility: hidden;
+            background: white;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .offer-face.back {
+            transform: rotateY(180deg);
+            overflow-y: auto;
+            padding: 14px;
+        }
+
+        .offer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 8px;
+        }
+
+        .offer-brand {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1e2a3b;
+            flex: 1;
+        }
+
+        .offer-category {
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: #e5e7eb;
+            color: #374151;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .badge-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .badge-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            width: 50px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .geo-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .geo-chip {
+            background: #dbeafe;
+            color: #0c4a6e;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .offer-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            font-size: 0.7rem;
+            color: #9ca3af;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .flip-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #6bbf59;
+            font-weight: 600;
+        }
+
+        .flip-icon {
+            width: 12px;
+            height: 12px;
+        }
+
+        .detail-section {
+            margin-bottom: 10px;
+        }
+
+        .detail-section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .detail-text {
+            font-size: 0.75rem;
+            color: #111827;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .cards-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+            .controls { flex-direction: column; align-items: stretch; }
+            .category-filter { justify-content: flex-start; }
+            .stats { gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <h1>DigiZag Offer List</h1>
+        <p>Select categories to filter or tap card for rules.</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-number" id="totalOffers">0</div>
+            <div class="stat-label">Offers Shown</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number" id="totalCategories">0</div>
+            <div class="stat-label">Active Categories</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="category-filter" id="filterButtons"></div>
+        <label class="sort-label">
+            <input type="checkbox" id="sortToggle">
+            <span>Sort</span>
+        </label>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+
+    <script>
+        const offersData = [
+            { brand: 'Adidas', category: 'Fashion & Apparel', discount: '15%', geo: ['KSA', 'UAE'], details: 'No caps.' },
+            { brand: 'SquatWolf-CPS', category: 'Fashion & Apparel', discount: '5%', geo: ['WW'], details: 'Tiers apply based on volume.' },
+            { brand: 'Ounass-Links', category: 'Fashion & Apparel', discount: 'Link-Based', geo: ['KSA', 'UAE', 'KWT', 'OMN', 'BAH', 'QAT'], details: 'No caps.' },
+            { brand: '6th Street', category: 'Fashion & Apparel', discount: '25% (New) / 7% (Return)', geo: ['KWT', 'UAE', 'BAH', 'KSA'], details: 'New cap: 50 AED/SAR | Ret cap: 25 AED/SAR.' },
+            { brand: 'Farfetch', category: 'Fashion & Apparel', discount: 'Links Campaign', geo: ['UAE', 'KSA', 'BAH', 'OMN', 'QAT'], details: 'No caps.' },
+            { brand: 'Styli', category: 'Fashion & Apparel', discount: '30% (New) / 10% (Return)', geo: ['KSA'], details: 'Cap: 50 SAR/AED.' },
+            { brand: 'Bloomingdales', category: 'Fashion & Apparel', discount: '10-15%', geo: ['KSA', 'UAE', 'KWT'], details: 'No caps.' },
+            { brand: 'Mamas & Papas', category: 'Fashion & Apparel', discount: '10-15%', geo: ['UAE', 'KWT', 'KSA'], details: 'No caps.' },
+            { brand: 'Under Armour', category: 'Fashion & Apparel', discount: '20%', geo: ['KSA', 'UAE', 'KWT'], details: 'Cap: 200 AED.' },
+            { brand: 'KenzWoman', category: 'Fashion & Apparel', discount: '20%', geo: ['KSA'], details: 'Min Spend: 300 SAR' },
+            { brand: 'VogaCloset', category: 'Fashion & Apparel', discount: '20-30%', geo: ['KSA', 'UAE', 'KWT', 'BAH'], details: 'Basket value caps.' },
+            { brand: 'Metro Brazil', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA', 'UAE'], details: 'No caps.' },
+            { brand: 'Gap', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA', 'UAE', 'KWT'], details: 'No caps.' },
+            { brand: 'American Eagle', category: 'Fashion & Apparel', discount: '8%', geo: ['KSA', 'KWT', 'UAE'], details: 'Oman is flat 4% base.' },
+            { brand: 'New Balance', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA', 'UAE'], details: 'No caps.' },
+            { brand: 'Footlocker', category: 'Fashion & Apparel', discount: '5%', geo: ['GCC', 'EGY'], details: 'No caps.' },
+            { brand: 'Mothercare', category: 'Fashion & Apparel', discount: '5%', geo: ['GCC'], details: 'New Customers.' },
+            { brand: 'Victoria Secret', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA', 'KWT', 'QAT', 'BAH'], details: 'All users.' },
+            { brand: 'Riva Fashion', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA'], details: 'No caps.' },
+            { brand: 'Level Shoes', category: 'Fashion & Apparel', discount: '10%', geo: ['GCC'], details: 'Starred items only.' },
+            { brand: 'Sun & Sands', category: 'Fashion & Apparel', discount: '20-30%', geo: ['KSA', 'UAE', 'KWT'], details: 'UAE Cap: 100 AED | KSA Cap: 1000 SAR' },
+            { brand: 'Magrabi', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA'], details: 'No caps.' },
+            { brand: 'Namshi', category: 'Fashion & Apparel', discount: '20% / 5% CB', geo: ['GCC'], details: 'Cap: 50 AED/SAR' },
+            { brand: 'H&M', category: 'Fashion & Apparel', discount: '5%', geo: ['GCC'], details: 'No caps.' },
+            { brand: 'Go Sport', category: 'Fashion & Apparel', discount: '10%', geo: ['EGY'], details: 'Volume based.' },
+            { brand: 'KADI Boutique', category: 'Fashion & Apparel', discount: 'N/A', geo: ['KSA'], details: 'No caps.' },
+            { brand: 'Stylevana', category: 'Beauty & Personal Care', discount: '7%', geo: ['WW'], details: 'No caps.' },
+            { brand: 'Al Dakheel Oud', category: 'Beauty & Personal Care', discount: '5%', geo: ['KSA', 'GCC'], details: 'No caps.' },
+            { brand: 'GRASSE PERFUME', category: 'Beauty & Personal Care', discount: '5%', geo: ['GCC'], details: 'Cap: 15 SAR' },
+            { brand: 'Whites', category: 'Beauty & Personal Care', discount: '5%', geo: ['KSA'], details: 'No caps.' },
+            { brand: 'Osma', category: 'Beauty & Personal Care', discount: '10%', geo: ['KSA'], details: 'Cap: 10 SAR' },
+            { brand: 'Reef Perfumes', category: 'Beauty & Personal Care', discount: '10%', geo: ['GCC'], details: 'Cap: 15 SAR' },
+            { brand: 'Bath & Body Works', category: 'Beauty & Personal Care', discount: '5%', geo: ['UAE', 'KWT', 'KSA'], details: 'UAE New: $5.22' },
+            { brand: 'Golden Scent', category: 'Beauty & Personal Care', discount: '10%', geo: ['GCC'], details: 'Cap: 40 SAR' },
+            { brand: 'ALNHADI PHARMACY', category: 'Beauty & Personal Care', discount: '5%', geo: ['KSA'], details: 'Cap: 25 SAR' },
+            { brand: 'Dar Alamirat', category: 'Beauty & Personal Care', discount: '3%', geo: ['KSA'], details: 'Max: 250 SAR' },
+            { brand: 'Eyewa', category: 'Beauty & Personal Care', discount: '10%', geo: ['GCC'], details: 'Frames at higher rate.' },
+            { brand: 'Beluar', category: 'Beauty & Personal Care', discount: '7%', geo: ['MENA'], details: 'No caps.' },
+            { brand: 'Rasees', category: 'Beauty & Personal Care', discount: '7%', geo: ['GCC'], details: 'No caps.' },
+            { brand: 'Deraah', category: 'Beauty & Personal Care', discount: '5%', geo: ['GCC', 'KSA', 'KWT', 'UAE'], details: 'No caps.' },
+            { brand: 'Mumzworld', category: 'General Retail & Marketplace', discount: '10%', geo: ['KSA'], details: 'No caps.' },
+            { brand: 'The Body Shop', category: 'Beauty & Personal Care', discount: '10%', geo: ['KSA', 'QAT', 'KWT', 'UAE', 'BAH'], details: 'No caps.' },
+            { brand: 'Cicabelle', category: 'Beauty & Personal Care', discount: '20%', geo: ['KSA'], details: 'No caps.' },
+            { brand: 'Dr Nutrition', category: 'Food & Nutrition', discount: '5% / 2%', geo: ['UAE'], details: 'No caps.' },
+            { brand: 'AloKozay', category: 'Food & Nutrition', discount: '20% / 10%', geo: ['KSA', 'GCC'], details: 'No caps.' },
+            { brand: 'DailyMeals', category: 'Food & Nutrition', discount: '15%', geo: ['GCC'], details: 'No caps.' },
+            { brand: 'ToYou', category: 'Food & Nutrition', discount: '30% / Free Delivery', geo: ['GCC', 'KSA'], details: 'No caps.' },
+            { brand: 'MyProtein', category: 'Food & Nutrition', discount: '12%', geo: ['GCC'], details: 'No caps.' },
+            { brand: 'Ajeer', category: 'Tech & Electronics', discount: '10%', geo: ['KSA'], details: 'No caps.' },
+            { brand: 'StoreUs', category: 'Tech & Electronics', discount: '15%', geo: ['UAE'], details: 'Category based.' },
+            { brand: 'Cartlow', category: 'Tech & Electronics', discount: '15%', geo: ['KSA', 'UAE'], details: 'Tiered by item type.' },
+            { brand: 'ALHABIB Bedding', category: 'Home & Furniture', discount: '5%', geo: ['KSA'], details: 'No caps.' },
+            { brand: 'HomzMart', category: 'Home & Furniture', discount: '5%', geo: ['UAE'], details: 'Appliances lower.' },
+            { brand: 'JAZEERA AIRWAYS', category: 'Travel & Hospitality', discount: 'Link-Based', geo: ['WW'], details: 'No caps.' },
+            { brand: 'Al Matar', category: 'Travel & Hospitality', discount: '7% / 5% CB', geo: ['KSA'], details: 'No caps.' },
+            { brand: 'Waya', category: 'Travel & Hospitality', discount: '7%', geo: ['KSA'], details: 'No caps.' },
+            { brand: 'EZ Hire', category: 'Automotive & Rideshare', discount: '10% / 8% / 5%', geo: ['UAE', 'KSA'], details: 'No caps.' },
+            { brand: 'Jeeny KSA', category: 'Automotive & Rideshare', discount: '40%', geo: ['KSA'], details: 'No caps.' },
+            { brand: 'Jeeny JO', category: 'Automotive & Rideshare', discount: '30%', geo: ['JOR'], details: 'No caps.' },
+            { brand: 'Al Daham', category: 'Jewelry & Luxury', discount: '20% / 5%', geo: ['GCC'], details: 'No caps.' },
+            { brand: 'Noon GCC', category: 'General Retail & Marketplace', discount: '10% / 5% CB', geo: ['KSA', 'UAE', 'QAT', 'KWT', 'OMN', 'BAH'], details: 'AOV tiers.' },
+            { brand: 'Noon Egypt', category: 'General Retail & Marketplace', discount: '10% / 5%', geo: ['EGY'], details: 'AOV Tiers.' },
+            { brand: 'Dabdoob', category: 'General Retail & Marketplace', discount: '25% / 10%', geo: ['UAE', 'KSA', 'KWT', 'BAH'], details: 'No caps.' },
+            { brand: 'Trendyol', category: 'General Retail & Marketplace', discount: 'Influencer Only', geo: ['KSA'], details: 'Exclusives.' },
+            { brand: 'NowNow', category: 'General Retail & Marketplace', discount: 'N/A', geo: ['UAE'], details: 'No caps.' },
+            { brand: 'AirAlo', category: 'Telecommunications', discount: '10%', geo: ['GCC', 'JOR', 'EGY'], details: 'Country based rates.' },
+            { brand: 'FNP', category: 'Gifts & Flowers', discount: '12%', geo: ['UAE'], details: 'No caps.' },
+            { brand: 'Wondergifts', category: 'Gifts & Flowers', discount: '8%', geo: ['GCC'], details: 'No caps.' }
+        ];
+
+        const performanceOrder = ['Trendyol', 'NiceOne', 'Namshi', 'Noon GCC', '6th Street', 'VogaCloset', 'Golden Scent', 'Sun & Sands', 'Level Shoes', 'Styli', 'Riva Fashion', 'ToYou', 'Adidas'];
+
+        const categories = [...new Set(offersData.map(o => o.category))].sort();
+        let selectedCategories = new Set(categories);
+        let reverseSort = false;
+
+        function sortByPerformance(data, reverse = false) {
+            return data.sort((a, b) => {
+                const indexA = performanceOrder.indexOf(a.brand);
+                const indexB = performanceOrder.indexOf(b.brand);
+                const rankA = indexA === -1 ? 999 : indexA;
+                const rankB = indexB === -1 ? 999 : indexB;
+                return reverse ? rankB - rankA : rankA - rankB;
+            });
+        }
+
+        function updateStats(data) {
+            document.getElementById('totalOffers').textContent = data.length;
+            document.getElementById('totalCategories').textContent = selectedCategories.size;
+        }
+
+        function renderCards() {
+            let filtered = offersData.filter(o => selectedCategories.has(o.category));
+            let sorted = sortByPerformance(filtered, reverseSort);
+
+            const cardsHtml = sorted.map(offer => `
+                <div class="offer-card">
+                    <div class="offer-inner">
+                        <div class="offer-face front">
+                            <div>
+                                <div class="offer-header">
+                                    <div class="offer-brand">${offer.brand}</div>
+                                    <div class="offer-category">${offer.category.split(' & ')[0]}</div>
+                                </div>
+                                <div class="badge-row">
+                                    <div class="badge-item">
+                                        <div class="badge-label">GEO</div>
+                                        <div class="geo-list">${offer.geo.map(g => `<span class="geo-chip">${g}</span>`).join('')}</div>
+                                    </div>
+                                    <div class="badge-item">
+                                        <div class="badge-label">Disc</div>
+                                        <div class="badge">${offer.discount}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="offer-footer">
+                                <div class="flip-hint"><span>Details</span> <span class="flip-icon">↺</span></div>
+                            </div>
+                        </div>
+                        <div class="offer-face back">
+                            <div>
+                                <div class="offer-header">
+                                    <div class="offer-brand">${offer.brand}</div>
+                                    <div class="offer-category">Rules</div>
+                                </div>
+                                <div class="detail-section">
+                                    <div class="detail-section-title">Overview</div>
+                                    <div class="detail-text">
+                                        <strong>GEO:</strong> ${offer.geo.join(', ')}<br>
+                                        <strong>Discount:</strong> ${offer.discount}
+                                    </div>
+                                </div>
+                                <div class="detail-section">
+                                    <div class="detail-section-title">Detailed Rules</div>
+                                    <div class="detail-text">${offer.details}</div>
+                                </div>
+                            </div>
+                            <div class="offer-footer"><span>← Back</span></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('cardsGrid').innerHTML = cardsHtml;
+            document.querySelectorAll('.offer-card').forEach(card => {
+                card.addEventListener('click', () => card.classList.toggle('flipped'));
+            });
+            updateStats(filtered);
+        }
+
+        function renderFilters() {
+            const container = document.getElementById('filterButtons');
+            let filterHtml = `<button class="filter-btn show-all-btn" id="showAllBtn">Show All</button>`;
+
+            filterHtml += categories.map(cat => `
+                <button class="filter-btn active" data-category="${cat}">
+                    <input type="checkbox" class="category-checkbox" data-category="${cat}" checked>
+                    <span class="category-name">${cat}</span>
+                </button>
+            `).join('');
+
+            container.innerHTML = filterHtml;
+
+            document.getElementById('showAllBtn').addEventListener('click', () => {
+                selectedCategories = new Set(categories);
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.add('active'));
+                document.querySelectorAll('.category-checkbox').forEach(cb => cb.checked = true);
+                renderCards();
+            });
+
+            document.querySelectorAll('.filter-btn[data-category]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const cat = btn.dataset.category;
+                    const checkbox = btn.querySelector('.category-checkbox');
+
+                    if (e.target.classList.contains('category-checkbox')) {
+                        if (checkbox.checked) {
+                            selectedCategories.add(cat);
+                            btn.classList.add('active');
+                        } else {
+                            selectedCategories.delete(cat);
+                            btn.classList.remove('active');
+                        }
+                    } else {
+                        selectedCategories.clear();
+                        selectedCategories.add(cat);
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.category-checkbox').forEach(c => c.checked = false);
+                        btn.classList.add('active');
+                        checkbox.checked = true;
+                    }
+                    renderCards();
+                });
+            });
+        }
+
+        document.getElementById('sortToggle').addEventListener('change', (e) => {
+            reverseSort = e.target.checked;
+            renderCards();
+        });
+
+        renderFilters();
+        renderCards();
+    </script>
+</body>
+</html>
