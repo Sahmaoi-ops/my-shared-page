@@ -95,7 +95,6 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            user-select: none;
         }
 
         .filter-btn:hover {
@@ -109,31 +108,6 @@
             color: white;
         }
 
-        .show-all-btn {
-            background: #1e2a3b;
-            color: white;
-            border-color: #1e2a3b;
-        }
-        .show-all-btn:hover {
-            background: #2d3e50;
-            color: white;
-            border-color: #2d3e50;
-        }
-
-        .filter-btn input[type="checkbox"] {
-            cursor: pointer;
-            width: 16px;
-            height: 16px;
-        }
-
-        .sort-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            color: #6b7280;
-        }
-
         .cards-grid {
             max-width: 1400px;
             margin: 0 auto;
@@ -145,7 +119,7 @@
         .offer-card {
             perspective: 1000px;
             cursor: pointer;
-            height: 240px;
+            height: 250px;
         }
 
         .offer-inner {
@@ -225,7 +199,7 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: #6b7280;
-            width: 50px;
+            width: 60px;
         }
 
         .badge {
@@ -238,6 +212,12 @@
             font-weight: 600;
             background: #f3f4f6;
             color: #374151;
+        }
+
+        .payout-badge {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #10b981;
         }
 
         .geo-list {
@@ -257,7 +237,7 @@
 
         .offer-footer {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
             font-size: 0.7rem;
             color: #9ca3af;
@@ -271,15 +251,6 @@
             gap: 4px;
             color: #6bbf59;
             font-weight: 600;
-        }
-
-        .flip-icon {
-            width: 12px;
-            height: 12px;
-        }
-
-        .detail-section {
-            margin-bottom: 10px;
         }
 
         .detail-section-title {
@@ -300,25 +271,23 @@
         @media (max-width: 768px) {
             .cards-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
             .controls { flex-direction: column; align-items: stretch; }
-            .category-filter { justify-content: flex-start; }
-            .stats { gap: 12px; }
         }
     </style>
 </head>
 <body>
     <div class="page-header">
         <h1>DigiZag Offer List</h1>
-        <p>Select categories to filter or tap card for rules.</p>
+        <p>Tap any card to flip and view full details, caps, and special rules.</p>
     </div>
 
     <div class="stats">
         <div class="stat-box">
             <div class="stat-number" id="totalOffers">0</div>
-            <div class="stat-label">Offers Shown</div>
+            <div class="stat-label">Total Offers</div>
         </div>
         <div class="stat-box">
             <div class="stat-number" id="totalCategories">0</div>
-            <div class="stat-label">Active Categories</div>
+            <div class="stat-label">Categories</div>
         </div>
     </div>
 
@@ -326,7 +295,7 @@
         <div class="category-filter" id="filterButtons"></div>
         <label class="sort-label">
             <input type="checkbox" id="sortToggle">
-            <span>Sort</span>
+            <span>Highest to Lowest</span>
         </label>
     </div>
 
@@ -334,79 +303,87 @@
 
     <script>
         const offersData = [
-            { brand: 'Adidas', category: 'Fashion & Apparel', discount: '15%', geo: ['KSA', 'UAE'], details: 'No caps.' },
-            { brand: 'SquatWolf-CPS', category: 'Fashion & Apparel', discount: '5%', geo: ['WW'], details: 'Tiers apply based on volume.' },
-            { brand: 'Ounass-Links', category: 'Fashion & Apparel', discount: 'Link-Based', geo: ['KSA', 'UAE', 'KWT', 'OMN', 'BAH', 'QAT'], details: 'No caps.' },
-            { brand: '6th Street', category: 'Fashion & Apparel', discount: '25% (New) / 7% (Return)', geo: ['KWT', 'UAE', 'BAH', 'KSA'], details: 'New cap: 50 AED/SAR | Ret cap: 25 AED/SAR.' },
-            { brand: 'Farfetch', category: 'Fashion & Apparel', discount: 'Links Campaign', geo: ['UAE', 'KSA', 'BAH', 'OMN', 'QAT'], details: 'No caps.' },
-            { brand: 'Styli', category: 'Fashion & Apparel', discount: '30% (New) / 10% (Return)', geo: ['KSA'], details: 'Cap: 50 SAR/AED.' },
-            { brand: 'Bloomingdales', category: 'Fashion & Apparel', discount: '10-15%', geo: ['KSA', 'UAE', 'KWT'], details: 'No caps.' },
-            { brand: 'Mamas & Papas', category: 'Fashion & Apparel', discount: '10-15%', geo: ['UAE', 'KWT', 'KSA'], details: 'No caps.' },
-            { brand: 'Under Armour', category: 'Fashion & Apparel', discount: '20%', geo: ['KSA', 'UAE', 'KWT'], details: 'Cap: 200 AED.' },
-            { brand: 'KenzWoman', category: 'Fashion & Apparel', discount: '20%', geo: ['KSA'], details: 'Min Spend: 300 SAR' },
-            { brand: 'VogaCloset', category: 'Fashion & Apparel', discount: '20-30%', geo: ['KSA', 'UAE', 'KWT', 'BAH'], details: 'Basket value caps.' },
-            { brand: 'Metro Brazil', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA', 'UAE'], details: 'No caps.' },
-            { brand: 'Gap', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA', 'UAE', 'KWT'], details: 'No caps.' },
-            { brand: 'American Eagle', category: 'Fashion & Apparel', discount: '8%', geo: ['KSA', 'KWT', 'UAE'], details: 'Oman is flat 4% base.' },
-            { brand: 'New Balance', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA', 'UAE'], details: 'No caps.' },
-            { brand: 'Footlocker', category: 'Fashion & Apparel', discount: '5%', geo: ['GCC', 'EGY'], details: 'No caps.' },
-            { brand: 'Mothercare', category: 'Fashion & Apparel', discount: '5%', geo: ['GCC'], details: 'New Customers.' },
-            { brand: 'Victoria Secret', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA', 'KWT', 'QAT', 'BAH'], details: 'All users.' },
-            { brand: 'Riva Fashion', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA'], details: 'No caps.' },
-            { brand: 'Level Shoes', category: 'Fashion & Apparel', discount: '10%', geo: ['GCC'], details: 'Starred items only.' },
-            { brand: 'Sun & Sands', category: 'Fashion & Apparel', discount: '20-30%', geo: ['KSA', 'UAE', 'KWT'], details: 'UAE Cap: 100 AED | KSA Cap: 1000 SAR' },
-            { brand: 'Magrabi', category: 'Fashion & Apparel', discount: '10%', geo: ['KSA'], details: 'No caps.' },
-            { brand: 'Namshi', category: 'Fashion & Apparel', discount: '20% / 5% CB', geo: ['GCC'], details: 'Cap: 50 AED/SAR' },
-            { brand: 'H&M', category: 'Fashion & Apparel', discount: '5%', geo: ['GCC'], details: 'No caps.' },
-            { brand: 'Go Sport', category: 'Fashion & Apparel', discount: '10%', geo: ['EGY'], details: 'Volume based.' },
-            { brand: 'KADI Boutique', category: 'Fashion & Apparel', discount: 'N/A', geo: ['KSA'], details: 'No caps.' },
-            { brand: 'Stylevana', category: 'Beauty & Personal Care', discount: '7%', geo: ['WW'], details: 'No caps.' },
-            { brand: 'Al Dakheel Oud', category: 'Beauty & Personal Care', discount: '5%', geo: ['KSA', 'GCC'], details: 'No caps.' },
-            { brand: 'GRASSE PERFUME', category: 'Beauty & Personal Care', discount: '5%', geo: ['GCC'], details: 'Cap: 15 SAR' },
-            { brand: 'Whites', category: 'Beauty & Personal Care', discount: '5%', geo: ['KSA'], details: 'No caps.' },
-            { brand: 'Osma', category: 'Beauty & Personal Care', discount: '10%', geo: ['KSA'], details: 'Cap: 10 SAR' },
-            { brand: 'Reef Perfumes', category: 'Beauty & Personal Care', discount: '10%', geo: ['GCC'], details: 'Cap: 15 SAR' },
-            { brand: 'Bath & Body Works', category: 'Beauty & Personal Care', discount: '5%', geo: ['UAE', 'KWT', 'KSA'], details: 'UAE New: $5.22' },
-            { brand: 'Golden Scent', category: 'Beauty & Personal Care', discount: '10%', geo: ['GCC'], details: 'Cap: 40 SAR' },
-            { brand: 'ALNHADI PHARMACY', category: 'Beauty & Personal Care', discount: '5%', geo: ['KSA'], details: 'Cap: 25 SAR' },
-            { brand: 'Dar Alamirat', category: 'Beauty & Personal Care', discount: '3%', geo: ['KSA'], details: 'Max: 250 SAR' },
-            { brand: 'Eyewa', category: 'Beauty & Personal Care', discount: '10%', geo: ['GCC'], details: 'Frames at higher rate.' },
-            { brand: 'Beluar', category: 'Beauty & Personal Care', discount: '7%', geo: ['MENA'], details: 'No caps.' },
-            { brand: 'Rasees', category: 'Beauty & Personal Care', discount: '7%', geo: ['GCC'], details: 'No caps.' },
-            { brand: 'Deraah', category: 'Beauty & Personal Care', discount: '5%', geo: ['GCC', 'KSA', 'KWT', 'UAE'], details: 'No caps.' },
-            { brand: 'Mumzworld', category: 'General Retail & Marketplace', discount: '10%', geo: ['KSA'], details: 'No caps.' },
-            { brand: 'The Body Shop', category: 'Beauty & Personal Care', discount: '10%', geo: ['KSA', 'QAT', 'KWT', 'UAE', 'BAH'], details: 'No caps.' },
-            { brand: 'Cicabelle', category: 'Beauty & Personal Care', discount: '20%', geo: ['KSA'], details: 'No caps.' },
-            { brand: 'Dr Nutrition', category: 'Food & Nutrition', discount: '5% / 2%', geo: ['UAE'], details: 'No caps.' },
-            { brand: 'AloKozay', category: 'Food & Nutrition', discount: '20% / 10%', geo: ['KSA', 'GCC'], details: 'No caps.' },
-            { brand: 'DailyMeals', category: 'Food & Nutrition', discount: '15%', geo: ['GCC'], details: 'No caps.' },
-            { brand: 'ToYou', category: 'Food & Nutrition', discount: '30% / Free Delivery', geo: ['GCC', 'KSA'], details: 'No caps.' },
-            { brand: 'MyProtein', category: 'Food & Nutrition', discount: '12%', geo: ['GCC'], details: 'No caps.' },
-            { brand: 'Ajeer', category: 'Tech & Electronics', discount: '10%', geo: ['KSA'], details: 'No caps.' },
-            { brand: 'StoreUs', category: 'Tech & Electronics', discount: '15%', geo: ['UAE'], details: 'Category based.' },
-            { brand: 'Cartlow', category: 'Tech & Electronics', discount: '15%', geo: ['KSA', 'UAE'], details: 'Tiered by item type.' },
-            { brand: 'ALHABIB Bedding', category: 'Home & Furniture', discount: '5%', geo: ['KSA'], details: 'No caps.' },
-            { brand: 'HomzMart', category: 'Home & Furniture', discount: '5%', geo: ['UAE'], details: 'Appliances lower.' },
-            { brand: 'JAZEERA AIRWAYS', category: 'Travel & Hospitality', discount: 'Link-Based', geo: ['WW'], details: 'No caps.' },
-            { brand: 'Al Matar', category: 'Travel & Hospitality', discount: '7% / 5% CB', geo: ['KSA'], details: 'No caps.' },
-            { brand: 'Waya', category: 'Travel & Hospitality', discount: '7%', geo: ['KSA'], details: 'No caps.' },
-            { brand: 'EZ Hire', category: 'Automotive & Rideshare', discount: '10% / 8% / 5%', geo: ['UAE', 'KSA'], details: 'No caps.' },
-            { brand: 'Jeeny KSA', category: 'Automotive & Rideshare', discount: '40%', geo: ['KSA'], details: 'No caps.' },
-            { brand: 'Jeeny JO', category: 'Automotive & Rideshare', discount: '30%', geo: ['JOR'], details: 'No caps.' },
-            { brand: 'Al Daham', category: 'Jewelry & Luxury', discount: '20% / 5%', geo: ['GCC'], details: 'No caps.' },
-            { brand: 'Noon GCC', category: 'General Retail & Marketplace', discount: '10% / 5% CB', geo: ['KSA', 'UAE', 'QAT', 'KWT', 'OMN', 'BAH'], details: 'AOV tiers.' },
-            { brand: 'Noon Egypt', category: 'General Retail & Marketplace', discount: '10% / 5%', geo: ['EGY'], details: 'AOV Tiers.' },
-            { brand: 'Dabdoob', category: 'General Retail & Marketplace', discount: '25% / 10%', geo: ['UAE', 'KSA', 'KWT', 'BAH'], details: 'No caps.' },
-            { brand: 'Trendyol', category: 'General Retail & Marketplace', discount: 'Influencer Only', geo: ['KSA'], details: 'Exclusives.' },
-            { brand: 'NowNow', category: 'General Retail & Marketplace', discount: 'N/A', geo: ['UAE'], details: 'No caps.' },
-            { brand: 'AirAlo', category: 'Telecommunications', discount: '10%', geo: ['GCC', 'JOR', 'EGY'], details: 'Country based rates.' },
-            { brand: 'FNP', category: 'Gifts & Flowers', discount: '12%', geo: ['UAE'], details: 'No caps.' },
-            { brand: 'Wondergifts', category: 'Gifts & Flowers', discount: '8%', geo: ['GCC'], details: 'No caps.' }
+            // NEWLY ADDED OFFERS
+            { brand: 'Daleel Store', category: 'Retail', geo: ['GCC'], discount: '5%', commission: '2.25% New / 1.5% Old', details: 'Focus on KSA and UAE. Excludes Telecom & Selected products. New: 2.25% | Old: 1.5%.' },
+            { brand: 'Sweater', category: 'Service', geo: ['KSA'], discount: '20% - 30%', commission: 'Varies', details: '20% Discount: 8.25% New / 3.75% Ret. | 30% Discount: 6% New / 4.5% Ret.' },
+            { brand: 'Selene', category: 'Beauty', geo: ['KSA'], discount: '10%', commission: '3.50%', details: 'Flat 3.5% payout.' },
+            { brand: 'Asos', category: 'Fashion', geo: ['WW'], discount: 'Link', commission: '3.50%', details: 'Standard affiliate link payout.' },
+            { brand: 'Fashion SA', category: 'Fashion', geo: ['KSA'], discount: '15%', commission: '7.50%', details: 'Flat 7.50% payout.' },
+
+            // FASHION & APPAREL
+            { brand: 'Namshi', category: 'Fashion', discount: 'Varies', geo: ['GCC'], commission: '3.9% New / 1.95% Old', details: 'New Customer: 3.9% | Old Customer: 1.95%.' },
+            { brand: 'VogaCloset', category: 'Fashion', discount: 'Up to 30%', geo: ['GCC', 'EGY'], commission: '16% New / 4% Old', details: 'GCC New: 16% | Old: 4%. Egypt Flat: $2.4.' },
+            { brand: 'Adidas', category: 'Fashion', discount: '15%', geo: ['KSA', 'UAE'], commission: '4.9%', details: 'Standard offer. Links specific: 5%.' },
+            { brand: '6th Street', category: 'Fashion', discount: '25% New / 7% Ret', geo: ['GCC'], commission: '7.5% New / 3.75% Old', details: 'New: 7.5% | Old: 3.75%. Caps apply.' },
+            { brand: 'Styli', category: 'Fashion', discount: 'Up to 30%', geo: ['KSA'], commission: '7%', details: 'Flat 7% commission.' },
+            { brand: 'Sun & Sands', category: 'Fashion', discount: '20-30%', geo: ['GCC'], commission: '4.8%', details: 'Flat 4.8%. Min spend 350 SAR/AED.' },
+            { brand: 'Level Shoes', category: 'Fashion', discount: '10%', geo: ['GCC'], commission: '5.25% New / 3.75% Old', details: 'New: 5.25% | Old: 3.75%.' },
+            { brand: 'H&M', category: 'Fashion', discount: '5%', geo: ['GCC'], commission: '$5.44 New / $1.3 Old', details: 'New: $5.44 | Old: $1.30.' },
+            { brand: 'Mothercare', category: 'Fashion', discount: '5%', geo: ['GCC'], commission: '$2.76', details: 'New Customer Only.' },
+            { brand: 'American Eagle', category: 'Fashion', discount: '8%', geo: ['GCC'], commission: '$3.45 New / $2 Ret', details: 'New: $3.45 | Old: $2.00.' },
+            { brand: 'Victoria Secret', category: 'Fashion', discount: '10%', geo: ['GCC'], commission: '$3.5', details: 'Flat $3.50 payout.' },
+            { brand: 'Footlocker', category: 'Fashion', discount: '5%', geo: ['GCC', 'EGY'], commission: '$4.2 GCC / $3.5 EG', details: 'GCC: $4.20 | Egypt: $3.50.' },
+            { brand: 'Under Armour', category: 'Fashion', discount: '20%', geo: ['GCC'], commission: '6.4%', details: 'Min spend 500 SAR/AED.' },
+            { brand: 'Mamas & Papas', category: 'Fashion', discount: '10-15%', geo: ['GCC'], commission: '4.50%', details: 'Flat 4.50% payout.' },
+            { brand: 'Bloomingdales', category: 'Fashion', discount: '10-15%', geo: ['GCC'], commission: '7.5% FP / 6% MD', details: 'FP: 7.5% | MD: 6%.' },
+            { brand: 'Gap', category: 'Fashion', discount: '10%', geo: ['GCC'], commission: '4.62%', details: 'Flat 4.62% payout.' },
+            { brand: 'Riva Fashion', category: 'Fashion', discount: '10%', geo: ['KSA'], commission: '7.5% New / 5.25% Old', details: 'New: 7.5% | Old: 5.25%.' },
+            { brand: 'KenzWoman', category: 'Fashion', discount: '20%', geo: ['KSA'], commission: '11.25% New / 3.75% Old', details: 'New: 11.25% | Existing: 3.75%.' },
+            { brand: 'Stylevana', category: 'Fashion', discount: 'Varies', geo: ['WW'], commission: '5.25%', details: 'Flat 5.25% payout.' },
+            { brand: 'SquatWolf', category: 'Fashion', discount: '5%', geo: ['WW'], commission: '7.50%', details: 'Flat 7.50% payout.' },
+            { brand: 'Muji', category: 'Fashion', discount: 'Varies', geo: ['GCC'], commission: '3%', details: 'Flat 3% payout.' },
+            { brand: 'Farfetch', category: 'Fashion', discount: 'Link', geo: ['GCC'], commission: '3.75%', details: 'Flat 3.75% payout.' },
+            { brand: 'Metro Brazil', category: 'Fashion', discount: '10%', geo: ['GCC'], commission: '11.9% New / 8.4% Old', details: 'New: 11.9% | Old: 8.4%.' },
+
+            // BEAUTY & CARE
+            { brand: 'NiceOne', category: 'Beauty', discount: '10% / 5%', geo: ['KSA'], commission: '8.25% New / 4.5% Ret', details: 'New: 8.25% | Ret: 4.5%. Cap 75 SAR.' },
+            { brand: 'Golden Scent', category: 'Beauty', discount: '10%', geo: ['GCC'], commission: '$6.50 New / $3.25 Ret', details: 'New: $6.50 | Repeat: $3.25.' },
+            { brand: 'Reef Perfumes', category: 'Beauty', discount: '10%', geo: ['GCC'], commission: '6%', details: 'Flat 6% commission.' },
+            { brand: 'Whites', category: 'Beauty', discount: '5%', geo: ['KSA'], commission: '7.50%', details: 'Excludes medicine.' },
+            { brand: 'Al Dakheel Oud', category: 'Beauty', discount: '5%', geo: ['KSA'], commission: '15%', details: 'Flat 15% payout.' },
+            { brand: 'GRASSE PERFUME', category: 'Beauty', discount: '5%', geo: ['GCC'], commission: '9.00%', details: 'Flat 9% commission.' },
+            { brand: 'Osma', category: 'Beauty', discount: '10%', geo: ['KSA'], commission: '4.00%', details: 'Cap 10 SAR.' },
+            { brand: 'ALNAHDI', category: 'Beauty', discount: '5%', geo: ['KSA'], commission: '3.50%', details: 'Cap 25 SAR.' },
+            { brand: 'Bath & Body Works', category: 'Beauty', discount: '5%', geo: ['GCC'], commission: '$3.4 New / $2.04 Ret', details: 'UAE New: $4.08.' },
+            { brand: 'Dar Alamirat', category: 'Beauty', discount: '3%', geo: ['KSA'], commission: '1.40%', details: 'Max 250 SAR.' },
+            { brand: 'Eyewa', category: 'Beauty', discount: '10%', geo: ['GCC'], commission: '3.65% - 10.95%', details: 'House SG: 10.95% | 3rd Party: 3.65%.' },
+            { brand: 'Deraah', category: 'Beauty', discount: '5%', geo: ['GCC'], commission: '3.75%', details: 'Flat 3.75% payout.' },
+            { brand: 'The Body Shop', category: 'Beauty', discount: '10%', geo: ['KSA', 'UAE'], commission: '11.25%', details: 'Flat 11.25% payout.' },
+            { brand: 'Rasees', category: 'Beauty', discount: '7%', geo: ['GCC'], commission: '8.45%', details: 'Flat 8.45% payout.' },
+            { brand: 'Beluar', category: 'Beauty', discount: '7%', geo: ['GCC'], commission: '8.45%', details: 'Flat 8.45% payout.' },
+
+            // RETAIL & MARKETPLACE
+            { brand: 'Noon GCC', category: 'Retail', geo: ['GCC'], discount: '10% / 5%', commission: '$3.06 New / $2.04 Old', details: 'KSA/UAE base. Other GCC tiers up to $8.' },
+            { brand: 'Noon Egypt', category: 'Retail', geo: ['EGY'], discount: '10% / 5%', commission: '$0.24 - $5.60', details: 'Tiered by AOV.' },
+            { brand: 'Dabdoob', category: 'Retail', geo: ['GCC'], discount: '25% / 10%', commission: '7.5%', details: 'Flat 7.5% commission.' },
+            { brand: 'Cartlow', category: 'Retail', geo: ['KSA', 'UAE'], discount: '15%', commission: '1.5% - 3.75%', details: 'Warehouse: 3.75%.' },
+            { brand: 'StoreUs', category: 'Retail', geo: ['UAE'], discount: '15%', commission: '0.8% - 3.2%', details: 'Non-electronics: 3.2%.' },
+            { brand: 'Trendyol', category: 'Retail', geo: ['KSA'], discount: 'Influencer', commission: 'Influencer Only', details: 'Influencer exclusive.' },
+            { brand: 'NowNow', category: 'Retail', geo: ['UAE'], discount: 'Link', commission: '$0.20', details: 'Fixed payout per delivery.' },
+
+            // SERVICES & TRAVEL
+            { brand: 'Jeeny KSA', category: 'Service', geo: ['KSA'], discount: '40%', commission: '$1.4', details: 'Fixed ride payout.' },
+            { brand: 'Jeeny JO', category: 'Service', geo: ['JOR'], discount: '30%', commission: '$0.7', details: 'Fixed ride payout.' },
+            { brand: 'Al Matar', category: 'Service', geo: ['KSA'], discount: '7% / 5%', commission: '0.75% - 3%', details: 'Hotels 3% | Flights 1.1%.' },
+            { brand: 'Trip', category: 'Service', geo: ['WW'], discount: 'Link', commission: '1.5% - 6%', details: 'Hotels 6% | Flights 1.5%.' },
+            { brand: 'JAZEERA AIRWAYS', category: 'Service', geo: ['WW'], discount: 'Link', commission: '1.00%', details: '1% per booking.' },
+            { brand: 'EZ Hire', category: 'Service', geo: ['GCC'], discount: 'Varies', commission: '1.5% - 2.43%', details: '1 week booking: 2.43%.' },
+            { brand: 'Waya', category: 'Service', geo: ['KSA'], discount: '7%', commission: '8.45%', details: 'Flat 8.45% payout.' },
+            { brand: 'Ajeer', category: 'Service', geo: ['KSA'], discount: '10%', commission: '4.25%', details: 'Flat 4.25% payout.' },
+
+            // FOOD & HOME
+            { brand: 'ToYou', category: 'Food', geo: ['KSA'], discount: '30%', commission: '$7 New / $0.35 Old', details: 'New User: $7 | Return User: $0.35.' },
+            { brand: 'DailyMeals', category: 'Food', geo: ['GCC'], discount: '15%', commission: '$12 New / $3 Ret', details: 'New User: $12 | Return: $3.' },
+            { brand: 'Dr Nutrition', category: 'Food', geo: ['UAE'], discount: '5% / 2%', commission: '4% FP / 0.8% Sale', details: 'Sale/Combo: 0.8%.' },
+            { brand: 'MyProtein', category: 'Food', geo: ['GCC'], discount: '12%', commission: '4.02%', details: 'Flat 4.02% payout.' },
+            { brand: 'Alokozay', category: 'Food', geo: ['GCC'], discount: 'Varies', commission: '7.5%', details: 'Flat 7.5% commission.' },
+            { brand: 'ALHABIB Bedding', category: 'Home', geo: ['KSA'], discount: '5%', commission: '3.50%', details: 'Flat 3.50% payout.' }
         ];
 
-        const performanceOrder = ['Trendyol', 'NiceOne', 'Namshi', 'Noon GCC', '6th Street', 'VogaCloset', 'Golden Scent', 'Sun & Sands', 'Level Shoes', 'Styli', 'Riva Fashion', 'ToYou', 'Adidas'];
+        // I added the new brands to the top of the priority list so they show up early
+        const performanceOrder = ['Daleel Store', 'Sweater', 'Fashion SA', 'Selene', 'Asos', 'Trendyol', 'NiceOne', 'Namshi', 'Noon GCC', '6th Street', 'VogaCloset', 'Golden Scent', 'Sun & Sands', 'Level Shoes', 'Styli', 'Riva Fashion', 'ToYou', 'Adidas'];
 
-        const categories = [...new Set(offersData.map(o => o.category))].sort();
+        const categories = [...new Set(offersData.map(o => o.category))];
         let selectedCategories = new Set(categories);
         let reverseSort = false;
 
@@ -422,7 +399,7 @@
 
         function updateStats(data) {
             document.getElementById('totalOffers').textContent = data.length;
-            document.getElementById('totalCategories').textContent = selectedCategories.size;
+            document.getElementById('totalCategories').textContent = new Set(data.map(o => o.category)).size;
         }
 
         function renderCards() {
@@ -430,13 +407,13 @@
             let sorted = sortByPerformance(filtered, reverseSort);
 
             const cardsHtml = sorted.map(offer => `
-                <div class="offer-card">
+                <div class="offer-card" onclick="this.classList.toggle('flipped')">
                     <div class="offer-inner">
                         <div class="offer-face front">
                             <div>
                                 <div class="offer-header">
                                     <div class="offer-brand">${offer.brand}</div>
-                                    <div class="offer-category">${offer.category.split(' & ')[0]}</div>
+                                    <div class="offer-category">${offer.category}</div>
                                 </div>
                                 <div class="badge-row">
                                     <div class="badge-item">
@@ -447,88 +424,58 @@
                                         <div class="badge-label">Disc</div>
                                         <div class="badge">${offer.discount}</div>
                                     </div>
+                                    <div class="badge-item">
+                                        <div class="badge-label">Payout</div>
+                                        <div class="badge payout-badge">${offer.commission}</div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="offer-footer">
-                                <div class="flip-hint"><span>Details</span> <span class="flip-icon">↺</span></div>
+                                <span>Quick Info</span>
+                                <div class="flip-hint">Details ↺</div>
                             </div>
                         </div>
                         <div class="offer-face back">
                             <div>
                                 <div class="offer-header">
                                     <div class="offer-brand">${offer.brand}</div>
-                                    <div class="offer-category">Rules</div>
                                 </div>
                                 <div class="detail-section">
-                                    <div class="detail-section-title">Overview</div>
-                                    <div class="detail-text">
-                                        <strong>GEO:</strong> ${offer.geo.join(', ')}<br>
-                                        <strong>Discount:</strong> ${offer.discount}
-                                    </div>
+                                    <div class="detail-section-title">Payout</div>
+                                    <div class="detail-text"><strong>Rate:</strong> ${offer.commission}</div>
                                 </div>
                                 <div class="detail-section">
-                                    <div class="detail-section-title">Detailed Rules</div>
+                                    <div class="detail-section-title">Rules & Caps</div>
                                     <div class="detail-text">${offer.details}</div>
                                 </div>
                             </div>
-                            <div class="offer-footer"><span>← Back</span></div>
+                            <div class="offer-footer"><span>← Tap to flip back</span></div>
                         </div>
                     </div>
                 </div>
             `).join('');
 
             document.getElementById('cardsGrid').innerHTML = cardsHtml;
-            document.querySelectorAll('.offer-card').forEach(card => {
-                card.addEventListener('click', () => card.classList.toggle('flipped'));
-            });
             updateStats(filtered);
         }
 
         function renderFilters() {
-            const container = document.getElementById('filterButtons');
-            let filterHtml = `<button class="filter-btn show-all-btn" id="showAllBtn">Show All</button>`;
-
-            filterHtml += categories.map(cat => `
-                <button class="filter-btn active" data-category="${cat}">
-                    <input type="checkbox" class="category-checkbox" data-category="${cat}" checked>
-                    <span class="category-name">${cat}</span>
-                </button>
+            const filterHtml = categories.map(cat => `
+                <button class="filter-btn active" onclick="toggleCategory('${cat}', this)">${cat}</button>
             `).join('');
-
-            container.innerHTML = filterHtml;
-
-            document.getElementById('showAllBtn').addEventListener('click', () => {
-                selectedCategories = new Set(categories);
-                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.add('active'));
-                document.querySelectorAll('.category-checkbox').forEach(cb => cb.checked = true);
-                renderCards();
-            });
-
-            document.querySelectorAll('.filter-btn[data-category]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const cat = btn.dataset.category;
-                    const checkbox = btn.querySelector('.category-checkbox');
-
-                    if (e.target.classList.contains('category-checkbox')) {
-                        if (checkbox.checked) {
-                            selectedCategories.add(cat);
-                            btn.classList.add('active');
-                        } else {
-                            selectedCategories.delete(cat);
-                            btn.classList.remove('active');
-                        }
-                    } else {
-                        selectedCategories.clear();
-                        selectedCategories.add(cat);
-                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                        document.querySelectorAll('.category-checkbox').forEach(c => c.checked = false);
-                        btn.classList.add('active');
-                        checkbox.checked = true;
-                    }
-                    renderCards();
-                });
-            });
+            document.getElementById('filterButtons').innerHTML = filterHtml;
         }
+
+        window.toggleCategory = (cat, btn) => {
+            if (selectedCategories.has(cat)) {
+                selectedCategories.delete(cat);
+                btn.classList.remove('active');
+            } else {
+                selectedCategories.add(cat);
+                btn.classList.add('active');
+            }
+            renderCards();
+        };
 
         document.getElementById('sortToggle').addEventListener('change', (e) => {
             reverseSort = e.target.checked;
